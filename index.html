@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>معرض الساعات</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 100%);
+      min-height: 100vh;
+      color: #e0e0e0;
+      overflow-x: hidden;
+    }
+
+    .header {
+      text-align: center;
+      padding: 30px 15px 20px;
+      color: #c0a060;
+    }
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      text-shadow: 0 2px 15px rgba(192,160,96,0.3);
+    }
+    .header p {
+      color: #888;
+      font-size: 0.95rem;
+      margin-top: 8px;
+    }
+
+    .count-badge {
+      text-align: center;
+      color: #666;
+      font-size: 0.9rem;
+      padding-bottom: 15px;
+    }
+
+    .gallery-container {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      padding: 0 20px 50px;
+      max-width: 520px;
+      margin: 0 auto;
+      overflow-y: auto;
+      max-height: 65vh;
+      scroll-behavior: smooth;
+      padding-top: 20px;
+    }
+
+    .watch-card {
+      background: linear-gradient(145deg, #1a1a2e, #16213e);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+      transition: transform 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease;
+      position: relative;
+      flex-shrink: 0;
+      transform-origin: center center;
+      will-change: transform, opacity;
+    }
+    .watch-card:hover {
+      box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+    }
+    .watch-card img {
+      width: 100%;
+      display: block;
+      border-radius: 24px 24px 0 0;
+      object-fit: cover;
+      max-height: 350px;
+    }
+    .watch-info {
+      padding: 20px;
+      text-align: center;
+    }
+    .watch-info h3 {
+      margin: 0 0 10px 0;
+      font-size: 1.2rem;
+      color: #c0a060;
+      font-weight: 600;
+    }
+    .watch-info p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #a0a0a0;
+    }
+    .price-tag {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 8px 22px;
+      background: linear-gradient(90deg, #c0a060, #d4af37);
+      color: #1a1a2e;
+      border-radius: 25px;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #555;
+    }
+    .empty-state h2 { color: #c0a060; margin-bottom: 10px; }
+
+    .gallery-container::-webkit-scrollbar { width: 6px; }
+    .gallery-container::-webkit-scrollbar-track { background: #0d0d1a; }
+    .gallery-container::-webkit-scrollbar-thumb { background: #c0a060; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>⌚ معرض الساعات</h1>
+    <p>تأثير الكريف ثلاثي الأبعاد — صورة تحت صورة</p>
+  </div>
+
+  <?php
+    $folder = 'images/';
+    $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    $images = [];
+
+    if (is_dir($folder)) {
+      $files = scandir($folder);
+      foreach ($files as $file) {
+        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        if (in_array($ext, $allowed)) {
+          $images[] = $folder . $file;
+        }
+      }
+    }
+  ?>
+
+  <div class="count-badge" id="countBadge">
+    <?= count($images) ?> صورة
+  </div>
+
+  <div class="gallery-container" id="gallery">
+    <?php if (count($images) === 0): ?>
+      <div class="empty-state">
+        <h2>📁 مجلد images/ فارغ</h2>
+        <p>ارفع صورك داخل مجلد images/ في الاستضافة</p>
+      </div>
+    <?php else: ?>
+      <?php foreach ($images as $index => $img): ?>
+        <div class="watch-card">
+          <img src="<?= htmlspecialchars($img) ?>" alt="ساعة <?= $index + 1 ?>">
+          <div class="watch-info">
+            <h3>ساعة #<?= $index + 1 ?></h3>
+            <p><?= htmlspecialchars(basename($img)) ?></p>
+            <span class="price-tag">عرض مميز</span>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+  </div>
+
+  <script>
+    const gallery = document.getElementById('gallery');
+    const countBadge = document.getElementById('countBadge');
+
+    // ====== تأثير الكريف (Curve) عند التمرير ======
+    function animateOnScroll() {
+      const cards = document.querySelectorAll('.watch-card');
+      if (cards.length === 0) return;
+
+      const containerRect = gallery.getBoundingClientRect();
+
+      cards.forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const cardCenter = rect.top + rect.height / 2;
+        const containerCenter = containerRect.top + containerRect.height / 2;
+        const distance = cardCenter - containerCenter;
+        const maxDistance = containerRect.height / 2 + 50;
+
+        // منحنى الكريف: كلما ابتعدت الصورة عن المنتصف
+        const normalizedDist = Math.max(-1, Math.min(1, distance / maxDistance));
+        const scale = 1 - Math.abs(normalizedDist) * 0.15;
+        const rotateX = normalizedDist * 8;
+        const opacity = 1 - Math.abs(normalizedDist) * 0.4;
+        const blur = Math.abs(normalizedDist) * 1.5;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) scale(${scale})`;
+        card.style.opacity = opacity;
+        card.style.filter = `blur(${blur}px)`;
+      });
+    }
+
+    gallery.addEventListener('scroll', animateOnScroll);
+    window.addEventListener('resize', animateOnScroll);
+    window.addEventListener('load', animateOnScroll);
+
+    // أول تشغيل
+    setTimeout(animateOnScroll, 100);
+  </script>
+
+</body>
+</html>
