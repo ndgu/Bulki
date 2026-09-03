@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -98,13 +97,6 @@
       font-size: 0.95rem;
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #555;
-    }
-    .empty-state h2 { color: #c0a060; margin-bottom: 10px; }
-
     .gallery-container::-webkit-scrollbar { width: 6px; }
     .gallery-container::-webkit-scrollbar-track { background: #0d0d1a; }
     .gallery-container::-webkit-scrollbar-thumb { background: #c0a060; border-radius: 3px; }
@@ -117,49 +109,49 @@
     <p>تأثير الكريف ثلاثي الأبعاد — صورة تحت صورة</p>
   </div>
 
-  <?php
-    $folder = 'images/';
-    $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-    $images = [];
+  <div class="count-badge" id="countBadge">0 صورة</div>
 
-    if (is_dir($folder)) {
-      $files = scandir($folder);
-      foreach ($files as $file) {
-        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-        if (in_array($ext, $allowed)) {
-          $images[] = $folder . $file;
-        }
-      }
-    }
-  ?>
-
-  <div class="count-badge" id="countBadge">
-    <?= count($images) ?> صورة
-  </div>
-
-  <div class="gallery-container" id="gallery">
-    <?php if (count($images) === 0): ?>
-      <div class="empty-state">
-        <h2>📁 مجلد images/ فارغ</h2>
-        <p>ارفع صورك داخل مجلد images/ في الاستضافة</p>
-      </div>
-    <?php else: ?>
-      <?php foreach ($images as $index => $img): ?>
-        <div class="watch-card">
-          <img src="<?= htmlspecialchars($img) ?>" alt="ساعة <?= $index + 1 ?>">
-          <div class="watch-info">
-            <h3>ساعة #<?= $index + 1 ?></h3>
-            <p><?= htmlspecialchars(basename($img)) ?></p>
-            <span class="price-tag">عرض مميز</span>
-          </div>
-        </div>
-      <?php endforeach; ?>
-    <?php endif; ?>
-  </div>
+  <div class="gallery-container" id="gallery"></div>
 
   <script>
+    // ====== أسماء الصور من نفس المجلد ======
+    const images = [
+      'IMG_20260904_003230_227.jpg',
+      'IMG_20260904_003230_390.jpg',
+      'IMG_20260904_003230_510.jpg',
+      'IMG_20260904_003230_563.jpg',
+      'IMG_20260904_003230_564.jpg',
+      'IMG_20260904_003230_682.jpg',
+      'IMG_20260904_003230_689.jpg',
+      'IMG_20260904_003230_694.jpg',
+      'IMG_20260904_003231_101.jpg',
+      'IMG_20260904_003231_138.jpg',
+      'IMG_20260904_003689.jpg',
+      'IMG_20260904_003230_694.jpg',
+      'IMG_20260904_003231_101.jpg',
+      'IMG_20260904_003231_138.jpg',
+      'IMG_20260904_003233_614.jpg'
+    ];
+
     const gallery = document.getElementById('gallery');
     const countBadge = document.getElementById('countBadge');
+
+    // عرض الصور
+    images.forEach((src, index) => {
+      const card = document.createElement('div');
+      card.className = 'watch-card';
+      card.innerHTML = `
+        <img src="${src}" alt="ساعة ${index + 1}" loading="lazy">
+        <div class="watch-info">
+          <h3>ساعة #${index + 1}</h3>
+          <p>${src}</p>
+          <span class="price-tag">عرض مميز</span>
+        </div>
+      `;
+      gallery.appendChild(card);
+    });
+
+    countBadge.textContent = images.length + ' صورة';
 
     // ====== تأثير الكريف (Curve) عند التمرير ======
     function animateOnScroll() {
@@ -175,7 +167,6 @@
         const distance = cardCenter - containerCenter;
         const maxDistance = containerRect.height / 2 + 50;
 
-        // منحنى الكريف: كلما ابتعدت الصورة عن المنتصف
         const normalizedDist = Math.max(-1, Math.min(1, distance / maxDistance));
         const scale = 1 - Math.abs(normalizedDist) * 0.15;
         const rotateX = normalizedDist * 8;
@@ -191,8 +182,6 @@
     gallery.addEventListener('scroll', animateOnScroll);
     window.addEventListener('resize', animateOnScroll);
     window.addEventListener('load', animateOnScroll);
-
-    // أول تشغيل
     setTimeout(animateOnScroll, 100);
   </script>
 
